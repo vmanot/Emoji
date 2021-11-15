@@ -2,12 +2,12 @@
 // Copyright (c) Vatsal Manot
 //
 
-import Swift
+import Swallow
 
 public struct Emoji: CaseIterable, Hashable, Identifiable, RawRepresentable {
-    public static var allCases: [Emoji] {
-        EmojiManager.shared.emojis.map({ Self(rawValue: $0.emoji)! })
-    }
+    public static let allCases: [Emoji] = {
+        Array(EmojiManager.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
+    }()
     
     public let rawValue: String
     

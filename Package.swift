@@ -16,9 +16,13 @@ let package = Package(
             targets: ["Emoji"]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/vmanot/Swallow.git", .branch("master"))
+    ],
     targets: [
         .target(
             name: "Emoji",
+            dependencies: ["Swallow"],
             path: "Sources",
             resources: [
                 .copy("Resources/emoji-list.json")
