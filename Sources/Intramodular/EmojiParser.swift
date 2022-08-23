@@ -7,7 +7,7 @@ import Swift
 
 open class EmojiParser {
     fileprivate static var loading = false
-    fileprivate static var emojiManager: EmojiManager = EmojiManager()
+    fileprivate static var emojiManager: EmojiListReader = EmojiListReader()
     fileprivate static var aliasMatchingRegex = try! NSRegularExpression(pattern: ":([\\w_+-]+)(?:(?:\\||::)((type_|skin-tone-\\d+)[\\w_]*))*:", options: .caseInsensitive)
     fileprivate static var aliasMatchingRegexOptionalColon: NSRegularExpression = try! NSRegularExpression(pattern: ":?([\\w_+-]+)(?:(?:\\||::)((type_|skin-tone-\\d+)[\\w_]*))*:?", options: .caseInsensitive)
     
@@ -22,7 +22,6 @@ open class EmojiParser {
     }
     
     public static func getAliasesFromUnicode(_ unicode: String) -> [String] {
-        
         let escapedUnicode = unicode.unicodeScalars.map { $0.escaped(asASCII: true) }
             .map { (escaped: String) -> String? in
                 
@@ -93,10 +92,10 @@ open class EmojiParser {
     }
     
     public static func getEmojiFromUnified(_ unified: String) -> String {
-        EmojiDescriptor(shortName: "", unified: unified).emoji
+        Emoji.Descriptor(name: "", shortName: "", unified: unified).emoji
     }
     
-    static func getEmojiFromAlias(_ alias: String) -> EmojiDescriptor? {
+    static func getEmojiFromAlias(_ alias: String) -> Emoji.Descriptor? {
         
         guard let emoji = emojiManager.shortNameForUnified[alias] else { return nil }
         
@@ -159,7 +158,6 @@ open class EmojiParser {
     }
     
     public static func getUnicodesForAliases(_ input: String) -> [(key: String, value: String?)] {
-        
         let matches = aliasMatchingRegex.matches(in: input, options: .withoutAnchoringBounds, range: NSRange(location: 0, length: input.count))
         
         if(matches.count == 0) {
@@ -185,19 +183,15 @@ open class EmojiParser {
         })
     }
     
-    public static var emojisByCategory: [EmojiCategory: [EmojiDescriptor]]{
+    public static var emojisByCategory: [Emoji.Category: [Emoji.Descriptor]]{
         return emojiManager.emojisForCategory
     }
     
-    public static var emojisByUnicode: [String: EmojiDescriptor] {
+    public static var emojisByUnicode: [String: Emoji.Descriptor] {
         return emojiManager.emojiForUnicode
     }
     
-    public static func getEmojisForCategory(_ category: EmojiCategory) -> [String] {
-        
-        let emojis = emojiManager.getEmojisForCategory(category) ?? []
-        
-        return emojis.map { $0.emoji }
-        
+    public static func getEmojisForCategory(_ category: Emoji.Category) -> [String] {
+        return (emojiManager.getEmojisForCategory(category) ?? []).map(\.emoji)
     }
 }

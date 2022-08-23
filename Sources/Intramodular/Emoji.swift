@@ -6,15 +6,11 @@ import Swallow
 
 public struct Emoji: CaseIterable, Hashable, Identifiable, RawRepresentable {
     public static let allCases: [Emoji] = {
-        Array(EmojiManager.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
+        Array(EmojiListReader.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
     }()
     
     public let rawValue: String
-    
-    public var name: String {
-        EmojiDescriptor(emoji: self).name
-    }
-    
+        
     public var id: some Hashable {
         rawValue
     }
@@ -24,17 +20,41 @@ public struct Emoji: CaseIterable, Hashable, Identifiable, RawRepresentable {
     }
 }
 
-// MARK: - Auxiliary Implementation -
+// MARK: - Conformances -
 
-extension Emoji {
-    public init?(descriptor: EmojiDescriptor) {
-        self.init(rawValue: descriptor.emoji)
+extension Emoji: Codable {
+    public init(from decoder: Decoder) throws {
+        let emoji = try Emoji(rawValue: RawValue(from: decoder)).unwrap()
+        
+        self = emoji
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try rawValue.encode(to: encoder)
     }
 }
 
-extension EmojiDescriptor {
+extension Emoji: Named {
+    public var name: String {
+        descriptor.name
+    }
+}
+
+// MARK: - Auxiliary Implementation -
+
+extension Emoji {
+    public init?(descriptor: Emoji.Descriptor) {
+        self.init(rawValue: descriptor.emoji)
+    }
+
+    public var descriptor: Emoji.Descriptor {
+        Emoji.Descriptor(emoji: self)
+    }
+}
+
+extension Emoji.Descriptor {
     public init!(emoji: Emoji) {
-        guard let descriptor = EmojiManager.shared.emojiForUnicode[emoji.rawValue] else {
+        guard let descriptor = EmojiListReader.shared.emojiForUnicode[emoji.rawValue] else {
             return nil
         }
         

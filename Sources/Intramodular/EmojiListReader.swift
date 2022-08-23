@@ -3,19 +3,18 @@
 //
 
 import Foundation
-import Swift
+import Swallow
 
-struct EmojiManager {
+struct EmojiListReader {
     static let shared = Self()
     
-    var emojis: [EmojiDescriptor] = []
-    var shortNameForUnified: [String:[EmojiDescriptor]] = [:]
-    var emojisForCategory: [EmojiCategory: [EmojiDescriptor]] = [:]
-    var emojiForUnified: [String:[EmojiDescriptor]] = [:]
-    var emojiForUnicode: [String: EmojiDescriptor] = [:]
+    var emojis: [Emoji.Descriptor] = []
+    var shortNameForUnified: [String:[Emoji.Descriptor]] = [:]
+    var emojisForCategory: [Emoji.Category: [Emoji.Descriptor]] = [:]
+    var emojiForUnified: [String:[Emoji.Descriptor]] = [:]
+    var emojiForUnicode: [String: Emoji.Descriptor] = [:]
+    var emojisPerCategory: [Emoji.Category: [Emoji]] = [:]
     
-    var emojisPerCategory: [EmojiCategory: [Emoji]] = [:]
-
     init() {
         guard let emojisListFilePath = Bundle.module.path(forResource: "emoji-list", ofType: "json") else {
             print("emoji-list.json was not found")
@@ -25,18 +24,15 @@ struct EmojiManager {
         let emojisListData = FileManager.default.contents(atPath: emojisListFilePath)
         
         do {
-            
             if let jsonArray = try JSONSerialization.jsonObject(with: emojisListData!, options: .allowFragments) as? [[String: Any]] {
-                
                 jsonArray.forEach { (emoji: [String:Any]) in
-                    
                     let name = emoji["name"] as? String
                     let isObsoleted = emoji["obsoleted_by"] != nil
                     let sortOrder: Int = emoji["sort_order"] as? Int ?? 0
                     
-                    var category: EmojiCategory? = nil
+                    var category: Emoji.Category? = nil
                     if let categoryName = emoji["category"] as? String {
-                        category = EmojiCategory(rawValue: categoryName)
+                        category = Emoji.Category(rawValue: categoryName)
                     }
                     
                     var unifieds: [String] = []
@@ -69,7 +65,7 @@ struct EmojiManager {
                                     skinVariations = []
                                 }
                                 
-                                let emojiObject = EmojiDescriptor(
+                                let emojiObject = Emoji.Descriptor(
                                     name: name ?? "",
                                     shortName: shortName,
                                     unified: unified,
@@ -115,29 +111,20 @@ struct EmojiManager {
                 }
             
             for key in emojisForCategory.keys {
-                emojisForCategory[key, default: []] = Set(emojisForCategory[key, default: []]).sorted(by: { $0.sortOrder < $1.sortOrder })
-                emojisPerCategory[key, default: []] = uniq(emojisForCategory[key, default: []].sorted(by: { $0.sortOrder < $1.sortOrder }).compactMap(Emoji.init))
+                emojisForCategory[key] = Set(emojisForCategory[key, default: []])
+                    .sorted(by: { $0.sortOrder < $1.sortOrder })
+                
+                emojisPerCategory[key] = emojisForCategory[key, default: []]
+                    .sorted(by: { $0.sortOrder < $1.sortOrder })
+                    .compactMap(Emoji.init)
+                    .distinct()
             }
-        }
-        catch {
+        } catch {
             print("Could not load emoji list \(error)")
         }
     }
     
-    func getEmojisForCategory(_ category: EmojiCategory) -> [EmojiDescriptor]? {
+    func getEmojisForCategory(_ category: Emoji.Category) -> [Emoji.Descriptor]? {
         return emojisForCategory[category]
     }
 }
-
-private func uniq<S : Sequence, T : Hashable>(_ source: S) -> [T] where S.Iterator.Element == T {
-    var buffer = [T]()
-    var added = Set<T>()
-    for elem in source {
-        if !added.contains(elem) {
-            buffer.append(elem)
-            added.insert(elem)
-        }
-    }
-    return buffer
-}
-
