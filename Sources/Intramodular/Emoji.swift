@@ -6,11 +6,11 @@ import Swallow
 
 public struct Emoji: CaseIterable, Hashable, Identifiable, RawRepresentable {
     public static let allCases: [Emoji] = {
-        Array(EmojiListReader.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
+        Array(EmojiDataReader.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
     }()
     
     public let rawValue: String
-        
+    
     public var id: some Hashable {
         rawValue
     }
@@ -36,7 +36,7 @@ extension Emoji: Codable {
 
 extension Emoji: Named {
     public var name: String {
-        descriptor.name
+        GitHubEmojiDataReader.data[self]?.description ?? descriptor.name
     }
 }
 
@@ -46,7 +46,7 @@ extension Emoji {
     public init?(descriptor: Emoji.Descriptor) {
         self.init(rawValue: descriptor.emoji)
     }
-
+    
     public var descriptor: Emoji.Descriptor {
         Emoji.Descriptor(emoji: self)
     }
@@ -54,7 +54,7 @@ extension Emoji {
 
 extension Emoji.Descriptor {
     public init!(emoji: Emoji) {
-        guard let descriptor = EmojiListReader.shared.emojiForUnicode[emoji.rawValue] else {
+        guard let descriptor = EmojiDataReader.shared.emojiForUnicode[emoji.rawValue] else {
             return nil
         }
         

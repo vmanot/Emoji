@@ -7,7 +7,7 @@ import Swift
 
 open class EmojiParser {
     fileprivate static var loading = false
-    fileprivate static var emojiManager: EmojiListReader = EmojiListReader()
+    fileprivate static var emojiManager: EmojiDataReader = EmojiDataReader()
     fileprivate static var aliasMatchingRegex = try! NSRegularExpression(pattern: ":([\\w_+-]+)(?:(?:\\||::)((type_|skin-tone-\\d+)[\\w_]*))*:", options: .caseInsensitive)
     fileprivate static var aliasMatchingRegexOptionalColon: NSRegularExpression = try! NSRegularExpression(pattern: ":?([\\w_+-]+)(?:(?:\\||::)((type_|skin-tone-\\d+)[\\w_]*))*:?", options: .caseInsensitive)
     
@@ -92,7 +92,7 @@ open class EmojiParser {
     }
     
     public static func getEmojiFromUnified(_ unified: String) -> String {
-        Emoji.Descriptor(name: "", shortName: "", unified: unified).emoji
+        Emoji.Descriptor(name: "", shortName: "", unified: unified, subcategory: nil).emoji
     }
     
     static func getEmojiFromAlias(_ alias: String) -> Emoji.Descriptor? {

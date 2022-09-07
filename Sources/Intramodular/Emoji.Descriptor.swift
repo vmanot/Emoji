@@ -11,6 +11,7 @@ extension Emoji {
         public var unified: String
         public var skinVariations: [Emoji.SkinVariation] = []
         public var category: Emoji.Category?
+        public var subcategory: String?
         public var isObsoleted: Bool = false
         public var sortOrder: Int = 0
         
@@ -24,6 +25,7 @@ extension Emoji {
             unified: String,
             skinVariations: [Emoji.SkinVariation] = [],
             category: Emoji.Category? = nil,
+            subcategory: String?,
             isObsoleted: Bool = false,
             sortOrder: Int = 0
         ) {
@@ -32,6 +34,7 @@ extension Emoji {
             self.skinVariations = skinVariations
             self.name = name
             self.category = category
+            self.subcategory = subcategory
             self.isObsoleted = isObsoleted
             self.sortOrder = sortOrder
         }

@@ -25,8 +25,14 @@ let package = Package(
             dependencies: ["Swallow"],
             path: "Sources",
             resources: [
-                .copy("Resources/emoji-list.json")
+                .copy("Resources/emoji-data.json"),
+                .copy("Resources/gemoji.json")
             ]
         ),
+        .testTarget(
+            name: "EmojiTests",
+            dependencies: ["Emoji"],
+            path: "Tests"
+        )
     ]
 )

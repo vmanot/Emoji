@@ -2,10 +2,10 @@
 // Copyright (c) Vatsal Manot
 //
 
-import Swift
+import Swallow
 
 extension Emoji {
-    public enum Category: String, CaseIterable, Identifiable {
+    public enum Category: String, CaseIterable, Codable, Hashable {
         case symbols = "Symbols"
         case objects = "Objects"
         case animalsAndNature = "Animals & Nature"
@@ -15,15 +15,19 @@ extension Emoji {
         case activities = "Activities"
         case flags = "Flags"
         case smileysAndEmotion = "Smileys & Emotion"
-        
-        public var id: some Hashable {
-            rawValue.hashValue
-        }
     }
 }
 
-extension Emoji.Category {
-    public var allEmojis: [Emoji] {
-        EmojiListReader.shared.emojisPerCategory[self]!
+// MARK: - Conformances
+
+extension Emoji.Category: Identifiable {
+    public var id: some Hashable {
+        rawValue
+    }
+}
+
+extension Emoji.Category: Named {
+    public var name: String {
+        rawValue
     }
 }

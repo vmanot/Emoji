@@ -5,7 +5,7 @@
 import Foundation
 import Swallow
 
-struct EmojiListReader {
+struct EmojiDataReader {
     static let shared = Self()
     
     var emojis: [Emoji.Descriptor] = []
@@ -15,9 +15,13 @@ struct EmojiListReader {
     var emojiForUnicode: [String: Emoji.Descriptor] = [:]
     var emojisPerCategory: [Emoji.Category: [Emoji]] = [:]
     
+    func getEmojisForCategory(_ category: Emoji.Category) -> [Emoji.Descriptor]? {
+        return emojisForCategory[category]
+    }
+    
     init() {
-        guard let emojisListFilePath = Bundle.module.path(forResource: "emoji-list", ofType: "json") else {
-            print("emoji-list.json was not found")
+        guard let emojisListFilePath = Bundle.module.path(forResource: "emoji-data", ofType: "json") else {
+            print("emoji-data.json was not found")
             return
         }
         
@@ -31,8 +35,14 @@ struct EmojiListReader {
                     let sortOrder: Int = emoji["sort_order"] as? Int ?? 0
                     
                     var category: Emoji.Category? = nil
+                    var subcategory: String? = nil
+                    
                     if let categoryName = emoji["category"] as? String {
                         category = Emoji.Category(rawValue: categoryName)
+                    }
+                    
+                    if let _subcategory = emoji["subcategory"] as? String {
+                        subcategory = _subcategory
                     }
                     
                     var unifieds: [String] = []
@@ -71,6 +81,7 @@ struct EmojiListReader {
                                     unified: unified,
                                     skinVariations: skinVariations,
                                     category: category,
+                                    subcategory: subcategory,
                                     isObsoleted: isObsoleted,
                                     sortOrder: sortOrder
                                 )
@@ -122,9 +133,5 @@ struct EmojiListReader {
         } catch {
             print("Could not load emoji list \(error)")
         }
-    }
-    
-    func getEmojisForCategory(_ category: Emoji.Category) -> [Emoji.Descriptor]? {
-        return emojisForCategory[category]
     }
 }
