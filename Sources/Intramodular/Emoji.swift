@@ -40,7 +40,7 @@ extension Emoji: Named {
     }
 }
 
-// MARK: - Auxiliary Implementation -
+// MARK: - Auxiliary -
 
 extension Emoji {
     public init?(descriptor: Emoji.Descriptor) {
