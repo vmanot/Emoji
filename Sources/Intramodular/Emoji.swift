@@ -4,23 +4,21 @@
 
 import Swallow
 
-public struct Emoji: CaseIterable, Hashable, Identifiable, RawRepresentable {
-    public static let allCases: [Emoji] = {
-        Array(EmojiDataReader.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
-    }()
-    
+public struct Emoji: Hashable, RawRepresentable {
     public let rawValue: String
-    
-    public var id: some Hashable {
-        rawValue
-    }
-    
+        
     public init?(rawValue: String) {
         self.rawValue = rawValue
     }
 }
 
-// MARK: - Conformances -
+// MARK: - Conformances
+
+extension Emoji: CaseIterable {
+    public static let allCases: [Emoji] = {
+        Array(EmojiDataReader.shared.emojis.lazy.map({ Self(rawValue: $0.emoji)! }).distinct())
+    }()
+}
 
 extension Emoji: Codable {
     public init(from decoder: Decoder) throws {
@@ -34,13 +32,19 @@ extension Emoji: Codable {
     }
 }
 
+extension Emoji: Identifiable {
+    public var id: some Hashable {
+        rawValue
+    }
+}
+
 extension Emoji: Named {
     public var name: String {
         GitHubEmojiDataReader.data[self]?.description ?? descriptor.name
     }
 }
 
-// MARK: - Auxiliary -
+// MARK: - Auxiliary
 
 extension Emoji {
     public init?(descriptor: Emoji.Descriptor) {
@@ -61,3 +65,15 @@ extension Emoji.Descriptor {
         self = descriptor
     }
 }
+
+// MARK: - SwiftUI Additions -
+
+#if canImport(SwiftUI)
+import SwiftUI
+
+extension Text {
+    public init(_ emoji: Emoji) {
+        self.init(emoji.rawValue)
+    }
+}
+#endif
